@@ -21,14 +21,17 @@ class Post {
       posterName: map['posterName'],
       posterImageUrl: map['posterImageUrl'],
       posterId: map['posterId'],
-      reference: snapshot.reference, // 注意。reference は map ではなく snapshot に入っています。
+      reference:
+          snapshot.reference, // 注意。reference は map ではなく snapshot に入っています。
     );
   }
 
   Map<String, dynamic> toMap() {
     return {
       'text': text,
-      'createdAt': createdAt,
+      'createdAt': createdAt != null
+          ? Timestamp.fromDate(createdAt!)
+          : FieldValue.serverTimestamp(),
       'posterName': posterName,
       'posterImageUrl': posterImageUrl,
       'posterId': posterId,
@@ -41,7 +44,7 @@ class Post {
   final String text;
 
   /// 投稿日時
-  final Timestamp createdAt;
+  final DateTime? createdAt;
 
   /// 投稿者の名前
   final String posterName;
@@ -54,4 +57,16 @@ class Post {
 
   /// Firestoreのどこにデータが存在するかを表すpath情報
   final DocumentReference reference;
+
+  @override
+  bool operator ==(Object other) => other is Post && hashCode == other.hashCode;
+
+  @override
+  int get hashCode =>
+      text.hashCode ^
+      createdAt.hashCode ^
+      posterName.hashCode ^
+      posterImageUrl.hashCode ^
+      posterId.hashCode ^
+      reference.hashCode;
 }

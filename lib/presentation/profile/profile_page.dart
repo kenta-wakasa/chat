@@ -1,10 +1,11 @@
-import 'package:chat/main.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
-class MyPage extends StatelessWidget {
-  const MyPage({super.key});
+import '../sign_in/sing_in_page.dart';
+
+class ProfilePage extends StatelessWidget {
+  const ProfilePage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -47,13 +48,14 @@ class MyPage extends StatelessWidget {
             const SizedBox(height: 16),
             ElevatedButton(
               onPressed: () async {
+                final navigator = Navigator.of(context);
                 // Google からサインアウト
                 await GoogleSignIn().signOut();
                 // Firebase からサインアウト
                 await FirebaseAuth.instance.signOut();
                 // SignInPage に遷移
                 // このページには戻れないようにします。
-                Navigator.of(context).pushAndRemoveUntil(
+                await navigator.pushAndRemoveUntil(
                   MaterialPageRoute(builder: (context) {
                     return const SignInPage();
                   }),
