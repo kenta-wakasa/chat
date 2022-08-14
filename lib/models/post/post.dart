@@ -21,7 +21,8 @@ class Post {
       posterName: map['posterName'],
       posterImageUrl: map['posterImageUrl'],
       posterId: map['posterId'],
-      reference: snapshot.reference, // 注意。reference は map ではなく snapshot に入っています。
+      reference:
+          snapshot.reference, // 注意。reference は map ではなく snapshot に入っています。
     );
   }
 
