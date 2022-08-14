@@ -2,8 +2,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
-import '../../main.dart';
 import '../../models/post/post.dart';
+import '../../references.dart';
 import '../profile/profile_page.dart';
 import 'post_widgets.dart';
 
@@ -25,7 +25,7 @@ class _ChatPageState extends State<ChatPage> {
 
     // 先ほど作った postsReference からランダムなIDのドキュメントリファレンスを作成します
     // doc の引数を空にするとランダムなIDが採番されます
-    final newDocumentReference = postsReference.doc();
+    final newDocumentReference = postsReferenceWithConverter.doc();
 
     final newPost = Post(
       text: text,
@@ -89,7 +89,9 @@ class _ChatPageState extends State<ChatPage> {
             Expanded(
               child: StreamBuilder<QuerySnapshot<Post>>(
                 // stream プロパティに snapshots() を与えると、コレクションの中のドキュメントをリアルタイムで監視することができます。
-                stream: postsReference.orderBy('createdAt').snapshots(),
+                stream: postsReferenceWithConverter
+                    .orderBy('createdAt')
+                    .snapshots(),
                 // ここで受け取っている snapshot に stream で流れてきたデータ入っています。
                 builder: (context, snapshot) {
                   // docs には Collection に保存されたすべてのドキュメントが入ります。
