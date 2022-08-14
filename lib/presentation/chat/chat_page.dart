@@ -29,7 +29,7 @@ class _ChatPageState extends State<ChatPage> {
 
     final newPost = Post(
       text: text,
-      createdAt: Timestamp.now(), // 投稿日時は現在とします
+      createdAt: null, // null を入れると ServerTimestamp を参照することになっています。
       posterName: posterName,
       posterImageUrl: posterImageUrl,
       posterId: posterId,

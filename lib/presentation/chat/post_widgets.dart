@@ -40,7 +40,7 @@ class PostWidget extends StatelessWidget {
                     ),
                     Text(
                       // toDate() で Timestamp から DateTime に変換できます。
-                      DateFormat('MM/dd HH:mm').format(post.createdAt.toDate()),
+                      DateFormat('MM/dd HH:mm').format(post.createdAt!),
                       style: const TextStyle(fontSize: 10),
                     ),
                   ],
