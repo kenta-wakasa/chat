@@ -57,4 +57,16 @@ class Post {
 
   /// Firestoreのどこにデータが存在するかを表すpath情報
   final DocumentReference reference;
+
+  @override
+  bool operator ==(Object other) => other is Post && hashCode == other.hashCode;
+
+  @override
+  int get hashCode =>
+      text.hashCode ^
+      createdAt.hashCode ^
+      posterName.hashCode ^
+      posterImageUrl.hashCode ^
+      posterId.hashCode ^
+      reference.hashCode;
 }

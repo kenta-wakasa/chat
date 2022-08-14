@@ -3,7 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'models/post/post.dart';
 
 final postsReferenceWithConverter =
-    Collection.posts.reference.withConverter<Post>(
+    Collection.posts.reference(FirebaseFirestore.instance).withConverter<Post>(
   fromFirestore: ((snapshot, _) {
     // 第二引数は使わないのでその場合は _ で不使用であることを分かりやすくしています。
     return Post.fromFirestore(snapshot); // 先ほど定期着した fromFirestore がここで活躍します。
@@ -16,7 +16,9 @@ final postsReferenceWithConverter =
 enum Collection {
   posts;
 
-  CollectionReference<Map<String, dynamic>> get reference {
-    return FirebaseFirestore.instance.collection(name);
+  CollectionReference<Map<String, dynamic>> reference(
+    FirebaseFirestore firestore,
+  ) {
+    return firestore.collection(name);
   }
 }
