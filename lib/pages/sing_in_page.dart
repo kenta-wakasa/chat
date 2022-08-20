@@ -2,8 +2,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
-import '../../utils/util_log.dart';
-import '../chat/chat_page.dart';
+import '../utils/util_log.dart';
+import 'chat_page.dart';
 
 class SignInPage extends StatefulWidget {
   const SignInPage({super.key});

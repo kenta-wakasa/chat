@@ -2,10 +2,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
-import '../../models/post/post.dart';
-import '../../references.dart';
-import '../profile/profile_page.dart';
-import 'post_widgets.dart';
+import '../models/post/post.dart';
+import '../references.dart';
+import '../presentation/profile/profile_page.dart';
+import '../presentation/chat/post_widgets.dart';
 
 class ChatPage extends StatefulWidget {
   const ChatPage({super.key});

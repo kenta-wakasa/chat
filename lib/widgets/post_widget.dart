@@ -2,7 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-import '../../models/post/post.dart';
+import '../models/post/post.dart';
 
 class PostWidget extends StatelessWidget {
   const PostWidget({
