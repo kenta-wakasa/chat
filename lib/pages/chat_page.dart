@@ -1,65 +1,25 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../models/post/post.dart';
-import '../references.dart';
-import '../presentation/profile/profile_page.dart';
-import '../presentation/chat/post_widgets.dart';
+import '../providers/auth.dart';
+import '../providers/post.dart';
+import '../providers/text_editing_controller.dart';
+import '../widgets/post_widget.dart';
+import 'profile_page.dart';
 
-class ChatPage extends StatefulWidget {
+class ChatPage extends ConsumerWidget {
   const ChatPage({super.key});
 
   @override
-  State<ChatPage> createState() => _ChatPageState();
-}
+  Widget build(BuildContext context, WidgetRef ref) {
+    final controller = ref.watch(textEditingControllerProvider('chat'));
+    final user = ref.watch(userProvider).value!;
 
-class _ChatPageState extends State<ChatPage> {
-  Future<void> sendPost(String text) async {
-    // まずは user という変数にログイン中のユーザーデータを格納します
-    final user = FirebaseAuth.instance.currentUser!;
-
-    final posterId = user.uid; // ログイン中のユーザーのIDがとれます
-    final posterName = user.displayName!; // Googleアカウントの名前がとれます
-    final posterImageUrl = user.photoURL!; // Googleアカウントのアイコンデータがとれます
-
-    // 先ほど作った postsReference からランダムなIDのドキュメントリファレンスを作成します
-    // doc の引数を空にするとランダムなIDが採番されます
-    final newDocumentReference = postsReferenceWithConverter.doc();
-
-    final newPost = Post(
-      text: text,
-      createdAt: null, // null を入れると ServerTimestamp を参照することになっています。
-      posterName: posterName,
-      posterImageUrl: posterImageUrl,
-      posterId: posterId,
-      reference: newDocumentReference,
-    );
-
-    // 先ほど作った newDocumentReference のset関数を実行するとそのドキュメントにデータが保存されます。
-    // 引数として Post インスタンスを渡します。
-    // 通常は Map しか受け付けませんが、withConverter を使用したことにより Post インスタンスを受け取れるようになります。
-    await newDocumentReference.set(newPost);
-  }
-
-  // build の外でインスタンスを作ります。
-  final controller = TextEditingController();
-
-  /// この dispose 関数はこのWidgetが使われなくなったときに実行されます。
-  @override
-  void dispose() {
-    // TextEditingController は使われなくなったら必ず dispose する必要があります。
-    controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
     // Scaffold 全体を GestureDetector で囲むことでタップ可能になります。
     return GestureDetector(
       onTap: () {
         // キーボードを閉じたい時はこれを呼びます。
-        FocusScope.of(context).unfocus();
+        primaryFocus?.unfocus();
       },
       child: Scaffold(
         appBar: AppBar(
@@ -78,7 +38,7 @@ class _ChatPageState extends State<ChatPage> {
               },
               child: CircleAvatar(
                 backgroundImage: NetworkImage(
-                  FirebaseAuth.instance.currentUser!.photoURL!,
+                  user.photoURL!,
                 ),
               ),
             )
@@ -87,29 +47,22 @@ class _ChatPageState extends State<ChatPage> {
         body: Column(
           children: [
             Expanded(
-              child: StreamBuilder<QuerySnapshot<Post>>(
-                // stream プロパティに snapshots() を与えると、コレクションの中のドキュメントをリアルタイムで監視することができます。
-                stream: postsReferenceWithConverter
-                    .orderBy('createdAt')
-                    .snapshots(),
-                // ここで受け取っている snapshot に stream で流れてきたデータ入っています。
-                builder: (context, snapshot) {
-                  // docs には Collection に保存されたすべてのドキュメントが入ります。
-                  // 取得までには時間がかかるのではじめは null が入っています。
-                  // null の場合は空配列が代入されるようにしています。
-                  final docs = snapshot.data?.docs ?? [];
-                  return ListView.builder(
-                    itemCount: docs.length,
-                    itemBuilder: (context, index) {
-                      // data() に Post インスタンスが入っています。
-                      // これは withConverter を使ったことにより得られる恩恵です。
-                      // 何もしなければこのデータ型は Map になります。
-                      final post = docs[index].data();
-                      return PostWidget(post: post);
+              child: ref.watch(postsProvider).maybeWhen(
+                    data: (data) {
+                      final docs = data.docs;
+                      return ListView.builder(
+                        itemCount: docs.length,
+                        itemBuilder: (context, index) {
+                          // data() に Post インスタンスが入っています。
+                          // これは withConverter を使ったことにより得られる恩恵です。
+                          // 何もしなければこのデータ型は Map になります。
+                          final post = docs[index].data();
+                          return PostWidget(post: post);
+                        },
+                      );
                     },
-                  );
-                },
-              ),
+                    orElse: () => const CircularProgressIndicator(),
+                  ),
             ),
             Padding(
               padding: const EdgeInsets.all(8),
@@ -136,8 +89,7 @@ class _ChatPageState extends State<ChatPage> {
                   filled: true,
                 ),
                 onFieldSubmitted: (text) {
-                  sendPost(text);
-                  // 入力中の文字列を削除します。
+                  ref.read(sendPostProvider).call(text);
                   controller.clear();
                 },
               ),
