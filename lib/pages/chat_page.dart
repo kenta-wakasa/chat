@@ -4,8 +4,8 @@ import 'package:flutter/material.dart';
 
 import '../models/post/post.dart';
 import '../references.dart';
-import '../presentation/profile/profile_page.dart';
-import '../presentation/chat/post_widgets.dart';
+import '../widgets/post_widget.dart';
+import 'profile_page.dart';
 
 class ChatPage extends StatefulWidget {
   const ChatPage({super.key});
@@ -23,23 +23,20 @@ class _ChatPageState extends State<ChatPage> {
     final posterName = user.displayName!; // Googleアカウントの名前がとれます
     final posterImageUrl = user.photoURL!; // Googleアカウントのアイコンデータがとれます
 
-    // 先ほど作った postsReference からランダムなIDのドキュメントリファレンスを作成します
-    // doc の引数を空にするとランダムなIDが採番されます
-    final newDocumentReference = postsReferenceWithConverter.doc();
-
     final newPost = Post(
       text: text,
       createdAt: null, // null を入れると ServerTimestamp を参照することになっています。
       posterName: posterName,
       posterImageUrl: posterImageUrl,
       posterId: posterId,
-      reference: newDocumentReference,
+      // doc の引数を空にするとランダムなIDが採番されます
+      reference: postsReferenceWithConverter.doc(),
     );
 
     // 先ほど作った newDocumentReference のset関数を実行するとそのドキュメントにデータが保存されます。
     // 引数として Post インスタンスを渡します。
     // 通常は Map しか受け付けませんが、withConverter を使用したことにより Post インスタンスを受け取れるようになります。
-    await newDocumentReference.set(newPost);
+    await newPost.reference.set(newPost);
   }
 
   // build の外でインスタンスを作ります。

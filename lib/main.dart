@@ -3,8 +3,8 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 
 import 'firebase_options.dart';
-import 'presentation/chat/chat_page.dart';
-import 'presentation/sign_in/sing_in_page.dart';
+import 'pages/chat_page.dart';
+import 'pages/sing_in_page.dart';
 
 Future<void> main() async {
   // main 関数でも async が使えます
