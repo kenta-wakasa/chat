@@ -89,7 +89,7 @@ class ChatPage extends ConsumerWidget {
                   filled: true,
                 ),
                 onFieldSubmitted: (text) {
-                  ref.read(sendPostProvider).call(text);
+                  ref.read(postRepositoryProvider).sendPost(text);
                   controller.clear();
                 },
               ),
