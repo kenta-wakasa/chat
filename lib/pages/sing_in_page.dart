@@ -8,6 +8,7 @@ class SignInPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final auth = ref.read(authProvider);
     return Scaffold(
       appBar: AppBar(
         title: const Text('GoogleSignIn'),
@@ -15,7 +16,7 @@ class SignInPage extends ConsumerWidget {
       body: Center(
         child: ElevatedButton(
           child: const Text('GoogleSignIn'),
-          onPressed: () => ref.read(signInWithGoogleProvider).call(),
+          onPressed: () => auth.signInWithGoogle(),
         ),
       ),
     );

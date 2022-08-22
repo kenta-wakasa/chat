@@ -8,6 +8,7 @@ class ProfilePage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final auth = ref.read(authProvider);
     final user = ref.watch(userProvider).value;
 
     if (user == null) {
@@ -51,7 +52,8 @@ class ProfilePage extends ConsumerWidget {
             ElevatedButton(
               onPressed: () async {
                 final navigator = Navigator.of(context);
-                await ref.read(signOutProvider).call();
+
+                await auth.signOutFromGoogle();
                 navigator.pop();
               },
               child: const Text('サインアウト'),

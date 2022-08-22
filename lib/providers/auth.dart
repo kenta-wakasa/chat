@@ -2,8 +2,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
-import '../utils/util_log.dart';
-
 final firebaseAuthProvider = Provider((ref) {
   return FirebaseAuth.instance;
 });
@@ -25,27 +23,27 @@ final isSingedInProvider = Provider((ref) {
   return ref.watch(uidProvider).whenData((value) => value != null);
 });
 
-final signInWithGoogleProvider = Provider((ref) {
-  return () async {
-    final firebaseAuth = ref.read(firebaseAuthProvider);
-    final googleSignIn = ref.read(googleSignInProvider);
+final authProvider = Provider((ref) => Auth(ref.read));
 
-    // GoogleSignIn をして得られた情報を Firebase と関連づけることをやっています。
-    final googleUser = await googleSignIn.signIn();
+class Auth {
+  Auth(this._read);
+
+  final Reader _read;
+  late final _firebaseAuth = _read(firebaseAuthProvider);
+  late final _googleSignIn = _read(googleSignInProvider);
+
+  Future<UserCredential> signInWithGoogle() async {
+    final googleUser = await _googleSignIn.signIn();
     final googleAuth = await googleUser?.authentication;
-
     final credential = GoogleAuthProvider.credential(
       accessToken: googleAuth?.accessToken,
       idToken: googleAuth?.idToken,
     );
-    await firebaseAuth.signInWithCredential(credential);
-    utilLog(ref.read(userProvider).value?.displayName);
-  };
-});
+    return _firebaseAuth.signInWithCredential(credential);
+  }
 
-final signOutProvider = Provider((ref) {
-  return () async {
-    await ref.read(googleSignInProvider).signOut();
-    await ref.read(firebaseAuthProvider).signOut();
-  };
-});
+  Future<void> signOutFromGoogle() async {
+    await _googleSignIn.signOut();
+    await _firebaseAuth.signOut();
+  }
+}
