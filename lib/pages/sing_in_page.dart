@@ -1,18 +1,19 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
+import '../providers/auth.dart';
 import '../utils/util_log.dart';
-import 'chat_page.dart';
 
-class SignInPage extends StatefulWidget {
+class SignInPage extends ConsumerStatefulWidget {
   const SignInPage({super.key});
 
   @override
-  State<SignInPage> createState() => _SignInPageState();
+  ConsumerState<ConsumerStatefulWidget> createState() => _SingInPageState();
 }
 
-class _SignInPageState extends State<SignInPage> {
+class _SingInPageState extends ConsumerState<SignInPage> {
   Future<void> signInWithGoogle() async {
     // GoogleSignIn をして得られた情報を Firebase と関連づけることをやっています。
     final googleUser =
@@ -25,7 +26,7 @@ class _SignInPageState extends State<SignInPage> {
       idToken: googleAuth?.idToken,
     );
 
-    await FirebaseAuth.instance.signInWithCredential(credential);
+    await ref.read(firebaseAuthProvider).signInWithCredential(credential);
   }
 
   @override
@@ -39,19 +40,7 @@ class _SignInPageState extends State<SignInPage> {
           child: const Text('GoogleSignIn'),
           onPressed: () async {
             await signInWithGoogle();
-            // ログインが成功すると FirebaseAuth.instance.currentUser にログイン中のユーザーの情報が入ります
-            utilLog(FirebaseAuth.instance.currentUser?.displayName);
-
-            // ログインに成功したら ChatPage に遷移します。
-            // 前のページに戻らせないようにするにはpushAndRemoveUntilを使います。
-            if (mounted) {
-              await Navigator.of(context).pushAndRemoveUntil(
-                MaterialPageRoute(builder: (context) {
-                  return const ChatPage();
-                }),
-                (route) => false,
-              );
-            }
+            utilLog(ref.read(firebaseAuthProvider).currentUser?.displayName);
           },
         ),
       ),

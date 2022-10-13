@@ -1,5 +1,4 @@
 import 'package:fake_cloud_firestore/fake_cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -7,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'firebase_options.dart';
 import 'pages/chat_page.dart';
 import 'pages/sing_in_page.dart';
+import 'providers/auth.dart';
 import 'providers/firestore_provider.dart';
 
 Future<void> main() async {
@@ -28,23 +28,22 @@ Future<void> main() async {
   );
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends ConsumerWidget {
   const MyApp({super.key});
   @override
-  Widget build(BuildContext context) {
-    // currentUser が null であればログインしていない
-    if (FirebaseAuth.instance.currentUser == null) {
-      // 未ログイン
-      return MaterialApp(
-        theme: ThemeData(),
-        home: const SignInPage(),
-      );
-    } else {
-      // ログイン中
-      return MaterialApp(
-        theme: ThemeData(),
-        home: const ChatPage(),
-      );
-    }
+  Widget build(BuildContext context, WidgetRef ref) {
+    return MaterialApp(
+      theme: ThemeData(),
+      home: ref.watch(userProvider).maybeWhen(data: (data) {
+        if (data == null) {
+          return const SignInPage();
+        }
+        return const ChatPage();
+      }, orElse: () {
+        return const Center(
+          child: CircularProgressIndicator(),
+        );
+      }),
+    );
   }
 }

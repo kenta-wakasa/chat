@@ -1,10 +1,11 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import '../models/post/post.dart';
+import '../providers/auth.dart';
 
-class PostWidget extends StatelessWidget {
+class PostWidget extends ConsumerWidget {
   const PostWidget({
     Key? key,
     required this.post,
@@ -13,7 +14,8 @@ class PostWidget extends StatelessWidget {
   final Post post;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final uid = ref.read(uidProvider).value!;
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Row(
@@ -57,8 +59,7 @@ class PostWidget extends StatelessWidget {
                         // 色はここで変えられます
                         // [100] この数字を小さくすると色が薄くなります。
                         // [条件式] ? A : B の三項演算子を使っています。
-                        color: FirebaseAuth.instance.currentUser!.uid ==
-                                post.posterId
+                        color: uid == post.posterId
                             ? Colors.amber[100]
                             : Colors.blue[100],
                       ),
@@ -69,12 +70,11 @@ class PostWidget extends StatelessWidget {
                     /// if文もこのRowの上に移動して、それぞれのボタンに書いていたものは削除してOKです。
                     ///
                     ///  List の中の場合は if 文であっても {} この波かっこはつけなくてよい
-                    if (FirebaseAuth.instance.currentUser!.uid == post.posterId)
+                    if (uid == post.posterId)
                       Row(
                         children: [
                           /// 編集ボタン
-                          if (FirebaseAuth.instance.currentUser!.uid ==
-                              post.posterId)
+                          if (uid == post.posterId)
                             IconButton(
                               onPressed: () {
                                 showDialog(
