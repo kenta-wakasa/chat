@@ -15,7 +15,7 @@ class PostWidget extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final uid = ref.read(uidProvider).value!;
+    final uid = ref.read(uidProvider).value ?? '';
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Row(
