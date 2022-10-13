@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'firebase_options.dart';
 import 'pages/chat_page.dart';
@@ -13,7 +14,12 @@ Future<void> main() async {
     // これが Firebase の初期化処理です。
     options: DefaultFirebaseOptions.android,
   );
-  runApp(const MyApp());
+  runApp(
+    /// Riverpodをつかうために必要
+    const ProviderScope(
+      child: MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
