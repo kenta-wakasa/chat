@@ -1,24 +1,24 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../models/post/post.dart';
-import '../references.dart';
+import '../providers/auth.dart';
+import '../providers/posts_provider.dart';
+import '../providers/posts_reference_provider.dart';
 import '../widgets/post_widget.dart';
 import 'profile_page.dart';
 
-class ChatPage extends StatefulWidget {
+class ChatPage extends ConsumerStatefulWidget {
   const ChatPage({super.key});
 
   @override
-  State<ChatPage> createState() => _ChatPageState();
+  ConsumerState<ConsumerStatefulWidget> createState() => _ChatPageState();
 }
 
-class _ChatPageState extends State<ChatPage> {
+class _ChatPageState extends ConsumerState<ChatPage> {
   Future<void> sendPost(String text) async {
     // まずは user という変数にログイン中のユーザーデータを格納します
-    final user = FirebaseAuth.instance.currentUser!;
-
+    final user = ref.watch(userProvider).value!;
     final posterId = user.uid; // ログイン中のユーザーのIDがとれます
     final posterName = user.displayName!; // Googleアカウントの名前がとれます
     final posterImageUrl = user.photoURL!; // Googleアカウントのアイコンデータがとれます
@@ -30,7 +30,7 @@ class _ChatPageState extends State<ChatPage> {
       posterImageUrl: posterImageUrl,
       posterId: posterId,
       // doc の引数を空にするとランダムなIDが採番されます
-      reference: postsReferenceWithConverter.doc(),
+      reference: ref.read(postsReferenceProvider).doc(),
     );
 
     // 先ほど作った newDocumentReference のset関数を実行するとそのドキュメントにデータが保存されます。
@@ -75,7 +75,7 @@ class _ChatPageState extends State<ChatPage> {
               },
               child: CircleAvatar(
                 backgroundImage: NetworkImage(
-                  FirebaseAuth.instance.currentUser!.photoURL!,
+                  ref.watch(userProvider).value!.photoURL!,
                 ),
               ),
             )
@@ -84,26 +84,27 @@ class _ChatPageState extends State<ChatPage> {
         body: Column(
           children: [
             Expanded(
-              child: StreamBuilder<QuerySnapshot<Post>>(
-                // stream プロパティに snapshots() を与えると、コレクションの中のドキュメントをリアルタイムで監視することができます。
-                stream: postsReferenceWithConverter
-                    .orderBy('createdAt')
-                    .snapshots(),
-                // ここで受け取っている snapshot に stream で流れてきたデータ入っています。
-                builder: (context, snapshot) {
-                  // docs には Collection に保存されたすべてのドキュメントが入ります。
-                  // 取得までには時間がかかるのではじめは null が入っています。
-                  // null の場合は空配列が代入されるようにしています。
-                  final docs = snapshot.data?.docs ?? [];
+              child: ref.watch(postsProvider).when(
+                data: (data) {
+                  /// 値が取得できた場合に呼ばれる。
                   return ListView.builder(
-                    itemCount: docs.length,
+                    itemCount: data.docs.length,
                     itemBuilder: (context, index) {
-                      // data() に Post インスタンスが入っています。
-                      // これは withConverter を使ったことにより得られる恩恵です。
-                      // 何もしなければこのデータ型は Map になります。
-                      final post = docs[index].data();
+                      final post = data.docs[index].data();
                       return PostWidget(post: post);
                     },
+                  );
+                },
+                error: (_, __) {
+                  /// 読み込み中にErrorが発生した場合に呼ばれる。
+                  return const Center(
+                    child: Text('不具合が発生しました。'),
+                  );
+                },
+                loading: () {
+                  /// 読み込み中の場合に呼ばれる。
+                  return const Center(
+                    child: CircularProgressIndicator(),
                   );
                 },
               ),
